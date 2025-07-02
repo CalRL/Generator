@@ -15,6 +15,7 @@ class Program
         };
 
         generator.Run();
+        generator.Export();
     }
 
     static string? GetArg(string[] args, string key)

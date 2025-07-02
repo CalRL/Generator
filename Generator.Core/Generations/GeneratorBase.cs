@@ -30,29 +30,32 @@ namespace Generator.Core.Generations
             this.SetExperienceFromArgs();
 
             byte gender = byte.Parse(GetArgOrDefault("gender", "0"));
-            SetGender(gender);
+            this.SetGender(gender);
 
             Nature nature = ParseNature(GetArgOrDefault("nature", "hardy"));
-            SetNature(nature);
-            SetStatNature(nature);
+            this.SetNature(nature);
+            this.SetStatNature(nature);
 
             byte ball = byte.Parse(GetArgOrDefault("ball", "4"));
-            SetBall(ball);
+            this.SetBall(ball);
 
             Species species = ParseSpecies(GetArgOrDefault("species", "Pikachu"));
-            SetSpecies(species);
+            this.SetSpecies(species);
 
             string name = GetArgOrDefault("nickname", species.ToString());
-            SetName(name);
+            this.SetName(name);
 
             bool isShiny = bool.Parse(GetArgOrDefault("shiny", "false"));
-            SetShiny(isShiny);
+            this.SetShiny(isShiny);
 
-            SetMoves();
-            SetIVs();
-            SetForm();
+            this.SetMoves();
+            this.SetIVs();
+            this.SetForm();
+        }
 
-            SaveFile();
+        public void Export()
+        {
+            this.SaveFile();
         }
         protected string GetArg(string key)
         {

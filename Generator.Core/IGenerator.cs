@@ -9,5 +9,6 @@ namespace Generator.Core
     public interface IGenerator
     {
         void Run();
+        void Export();
     }
 }
