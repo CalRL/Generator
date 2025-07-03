@@ -11,4 +11,8 @@
       <HintPath>..\PKHeX\PKHeX.Core\bin\Release\net9.0\PKHeX.Core.dll</HintPath>
     </Reference>
   </ItemGroup>
+  
+  <ItemGroup>
+    <InternalsVisibleTo Include="Generator.Tests" />
+  </ItemGroup>
 </Project>

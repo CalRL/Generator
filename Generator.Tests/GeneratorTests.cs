@@ -10,6 +10,37 @@ namespace Generator.Tests
 {
     public class GeneratorTests
     {
+        private readonly string[] args = new[]
+        {
+            "--version=9",
+            "--species=25",
+            "--nickname=Pikachu",
+            "--level=50",
+            "--trainerName=CAL",
+        };
+
+        //basic tests
+        [Fact]
+        public void SetLevel_SetsCorrectEXP()
+        {
+            byte setLevel = 50;
+            PK9Generator generator = new PK9Generator(this.args);
+            generator.SetSpecies(Species.Pikachu);
+            generator.SetLevel(setLevel);
+
+            PK9 pk = generator.GetPokemon();
+            PersonalInfo9SV entry = PersonalTable.SV.GetFormEntry((int)Species.Pikachu, 0);
+
+            byte growth = entry.EXPGrowth;
+            uint expectedEXP = Experience.GetEXP(setLevel, growth);
+            uint expectedLevel = Experience.GetLevel(growth, setLevel);
+            // Pikachu is MediumFast
+            Assert.Equal(expectedEXP, generator.GetPokemon().EXP);
+            Assert.Equal(expectedLevel, generator.GetPokemon().CurrentLevel);
+        }
+
+
+        // in depth tests
         [Fact]
         public void Generates_Pikachu_Level_50()
         {
@@ -24,7 +55,7 @@ namespace Generator.Tests
             var generator = new PK9Generator(args);
             generator.Run();
 
-            var pk = generator.GetPokemon();
+            PK9 pk = (PK9) generator.GetPokemon();  
 
             Assert.Equal((int)Species.Pikachu, pk.Species);
             Assert.Equal("Pikachu", pk.Nickname);
@@ -48,7 +79,7 @@ namespace Generator.Tests
                 generator.Run();
             });
 
-            Assert.Contains("cannot set both", ex.Message.ToLower());
+            Assert.Contains("cannot specify both", ex.Message.ToLower());
         }
         [Fact]
         public void Generates_With_Custom_IVs()
@@ -59,24 +90,19 @@ namespace Generator.Tests
                 "--species=25",
                 "--nickname=Pikachu",
                 "--level=50",
-                "--iv_hp=31",
-                "--iv_atk=31",
-                "--iv_def=0",
-                "--iv_spa=31",
-                "--iv_spd=0",
-                "--iv_spe=31"
+                "--ivs=31,31,0,31,0,31"
             };
 
             var generator = new PK9Generator(args);
             generator.Run();
-            var pk = generator.GetPokemon();
+            PK9 pk = (PK9) generator.GetPokemon();
 
             Assert.Equal(31, pk.IV_HP);
             Assert.Equal(31, pk.IV_ATK);
             Assert.Equal(0, pk.IV_DEF);
-            Assert.Equal(31, pk.IV_SPA);
-            Assert.Equal(0, pk.IV_SPD);
             Assert.Equal(31, pk.IV_SPE);
+            Assert.Equal(0, pk.IV_SPA);
+            Assert.Equal(31, pk.IV_SPD);
         }
 
         [Fact]
@@ -98,10 +124,10 @@ namespace Generator.Tests
             generator.Run();
             var pk = generator.GetPokemon();
 
-            Assert.Equal("TACKLE", pk.Move1.ToString().ToUpperInvariant());
-            Assert.Equal("GROWL", pk.Move2.ToString().ToUpperInvariant());
-            Assert.Equal("LEECHSEED", pk.Move3.ToString().Replace(" ", "").ToUpperInvariant());
-            Assert.Equal("VINEWHIP", pk.Move4.ToString().Replace(" ", "").ToUpperInvariant());
+            Assert.Equal((int)Move.Tackle, pk.Move1);
+            Assert.Equal((int)Move.Growl, pk.Move2);
+            Assert.Equal((int)Move.LeechSeed, pk.Move3);
+            Assert.Equal((int)Move.VineWhip, pk.Move4);
         }
 
         [Fact]

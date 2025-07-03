@@ -11,6 +11,6 @@ namespace Generator.Core.Generations
     {
         public PK9Generator(string[] args) : base(args, new PK9 { Version = GameVersion.SV }) { }
 
-        protected override IPersonalTable GetPersonalTable() => PersonalTable.SV;
+        protected internal override IPersonalTable GetPersonalTable() => PersonalTable.SV;
     }
 }

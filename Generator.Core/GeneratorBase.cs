@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using PKHeX.Core;
 
-namespace Generator.Core.Generations
+namespace Generator.Core
 {
     public abstract class GeneratorBase<T> : IGenerator where T : PKM
     {
@@ -25,7 +25,7 @@ namespace Generator.Core.Generations
         public void Run()
         {
             string? trainerName = GetArgOrDefault("trainername", "PLACEHOLDER");
-            SetOTName(trainerName);
+            this.SetOTName(trainerName);
 
             this.SetExperienceFromArgs();
 
@@ -55,33 +55,33 @@ namespace Generator.Core.Generations
 
         public void Export()
         {
-            this.SaveFile();
+            SaveFile();
         }
-        protected string GetArg(string key)
+        protected internal string GetArg(string key)
         {
             string prefix = $"--{key}=";
-            string? match = args.FirstOrDefault(arg => arg.StartsWith(prefix));
+            string? match = args.FirstOrDefault(arg => arg.StartsWith(prefix, StringComparison.OrdinalIgnoreCase));
             if (match == null || !match.Contains("="))
                 throw new ArgumentException($"Missing or invalid argument: --{key}=<value>");
             return match.Split("=", 2)[1];
         }
 
-        protected string GetArgOrDefault(string key, string defaultValue)
+        protected internal string GetArgOrDefault(string key, string defaultValue)
         {
             try { return GetArg(key); }
             catch { return defaultValue; }
         }
-        protected string? GetArgOrNull(string key)
+        protected internal string? GetArgOrNull(string key)
         {
             try { return GetArg(key); }
             catch { return null; }
         }
 
-        protected Species ParseSpecies(string name) => Enum.Parse<Species>(name, true);
-        protected Nature ParseNature(string name) => Enum.Parse<Nature>(name, true);
-        protected ushort ParseMove(string name) => (ushort)Enum.Parse<Move>(name, true);
+        protected internal Species ParseSpecies(string name) => Enum.Parse<Species>(name, true);
+        protected internal Nature ParseNature(string name) => Enum.Parse<Nature>(name, true);
+        protected internal ushort ParseMove(string name) => (ushort)Enum.Parse<Move>(name, true);
 
-        protected int[] ParseStatArray(string csv)
+        protected internal int[] ParseStatArray(string csv)
         {
             var parts = csv.Split(',');
             if (parts.Length != 6)
@@ -89,20 +89,21 @@ namespace Generator.Core.Generations
             return parts.Select(p => int.Parse(p.Trim())).ToArray();
         }
 
-        protected virtual void SetName(string name) => pokemon.Nickname = name;
-        protected virtual void SetSpecies(Species species) => pokemon.Species = (ushort)species;
-        protected virtual void SetOTName(string name) => pokemon.OriginalTrainerName = name;
-        protected virtual void SetEXP(uint xp) => pokemon.EXP = xp;
+        protected internal virtual void SetName(string name) => pokemon.Nickname = name;
+        protected internal virtual void SetSpecies(Species species) => pokemon.Species = (ushort)species;
+        protected internal virtual void SetOTName(string name) => pokemon.OriginalTrainerName = name;
+        protected internal virtual void SetEXP(uint xp) => pokemon.EXP = xp;
         
-        protected virtual void SetLevel(byte level)
+        protected internal virtual void SetLevel(byte level)
         {
-            var xp = this.GetRequiredEXP((Species)this.pokemon.Species, level);
+            var xp = this.GetRequiredEXP((Species)pokemon.Species, level);
             pokemon.EXP = xp;
+            pokemon.CurrentLevel = level;
         }
-        protected virtual void SetExperienceFromArgs()
+        protected internal virtual void SetExperienceFromArgs()
         {
-            string? xpStr = this.GetArgOrNull("xp");
-            string? levelStr = this.GetArgOrNull("level");
+            string? xpStr = GetArgOrNull("xp");
+            string? levelStr = GetArgOrNull("level");
 
             if (xpStr != null && levelStr != null)
                 throw new ArgumentException("You cannot specify both --xp and --level.");
@@ -121,14 +122,14 @@ namespace Generator.Core.Generations
             }
             else
             {
-                throw new ArgumentException("Missing required argument: --xp or --level");
+                this.SetLevel(1);
             }
         }
-        protected virtual void SetGender(byte gender) => pokemon.Gender = gender;
-        protected virtual void SetBall(byte ball) => pokemon.Ball = ball;
-        protected virtual void SetNature(Nature nature) => pokemon.Nature = nature;
-        protected virtual void SetStatNature(Nature nature) => pokemon.StatNature = nature;
-        protected virtual void SetEVs(string evs)
+        protected internal virtual void SetGender(byte gender) => pokemon.Gender = gender;
+        protected internal virtual void SetBall(byte ball) => pokemon.Ball = ball;
+        protected internal virtual void SetNature(Nature nature) => pokemon.Nature = nature;
+        protected internal virtual void SetStatNature(Nature nature) => pokemon.StatNature = nature;
+        protected internal virtual void SetEVs(string evs)
         {
             string[] evsSplit = evs.Split(',');
 
@@ -147,14 +148,14 @@ namespace Generator.Core.Generations
 
 
         }
-        protected virtual void SetForm()
+        protected internal virtual void SetForm()
         {
             byte form = byte.Parse(GetArgOrDefault("form", "0"));
             pokemon.Form = form;
         }
-        protected virtual void SetShiny(bool shiny) => pokemon.SetIsShiny(shiny);
+        protected internal virtual void SetShiny(bool shiny) => pokemon.SetIsShiny(shiny);
 
-        protected virtual void SetMoves()
+        protected internal virtual void SetMoves()
         {
             var moves = new[]
             {
@@ -166,8 +167,8 @@ namespace Generator.Core.Generations
             pokemon.Moves = moves;
         }
 
-        protected abstract IPersonalTable GetPersonalTable();
-        protected virtual void SetIVs()
+        protected internal abstract IPersonalTable GetPersonalTable();
+        protected internal virtual void SetIVs()
         {
             var stats = ParseStatArray(GetArgOrDefault("ivs", "0,0,0,0,0,0"));
             for (int i = 0; i < 6; i++)
@@ -180,14 +181,14 @@ namespace Generator.Core.Generations
             }              
         }
 
-        protected virtual uint GetRequiredEXP(Species species, byte level)
+        protected internal virtual uint GetRequiredEXP(Species species, byte level)
         {
             var table = GetPersonalTable();
             var growth = table[(int)species].EXPGrowth;
             return Experience.GetEXP(growth, level);
         }
 
-        protected virtual void SaveFile()
+        protected internal virtual void SaveFile()
         {
             string name = ((Species)pokemon.Species).ToString();
             string path = Path.Combine(Environment.CurrentDirectory, "exported", $"{name}.PK{pokemon.Format}");
