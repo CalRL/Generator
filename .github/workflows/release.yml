@@ -12,6 +12,10 @@ jobs:
             - name: Checkout repository
               uses: actions/checkout@v3
 
+            - name: Clone PKHeX.Core only (shallow)
+              run: |
+                  git clone --depth 1 https://github.com/kwsch/PKHeX.git PKHeX
+
             - name: Setup .NET
               uses: actions/setup-dotnet@v3
               with:
@@ -19,6 +23,7 @@ jobs:
 
             - name: Read version from Directory.Build.props
               id: version
+              shell: pwsh
               run: |
                   $xml = [xml](Get-Content Directory.Build.props)
                   $v = $xml.Project.PropertyGroup.Version
