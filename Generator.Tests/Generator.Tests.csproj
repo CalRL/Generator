@@ -25,9 +25,7 @@
     <ProjectReference Include="..\Generator.Core\Generator.Core.csproj" />
   </ItemGroup>
   <ItemGroup>
-    <Reference Include="PKHeX.Core">
-      <HintPath>..\PKHeX\PKHeX.Core\bin\Release\net9.0\PKHeX.Core.dll</HintPath>
-    </Reference>
+    <ProjectReference Include="..\PKHeX\PKHeX.Core\PKHeX.Core.csproj" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="TestResults\" />
