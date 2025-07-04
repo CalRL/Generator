@@ -17,9 +17,27 @@ namespace Generator.Core
             this.pokemon = pokemon;
         }
 
-        public T GetPokemon()
+        public PKM GetPokemon()
+        {
+            return (PKM) pokemon;
+        }
+
+        public T GetTypedPokemon()
         {
             return pokemon;
+        }
+
+        public GameVersion GetGameVersion()
+        {
+            return this.GetPokemon().Version;
+        }
+
+        public IPersonalTable GetPersonalTable()
+        {
+            GameVersion version = this.GetGameVersion();
+            IPersonalTable personalTable = PersonalTableMap.Get(version);
+
+            return personalTable;
         }
 
         public void Run()
@@ -96,6 +114,10 @@ namespace Generator.Core
         
         protected internal virtual void SetLevel(byte level)
         {
+            if(level > 100 || level < 0)
+            {
+                throw new ArgumentException("Level must be between 0 and 100!");
+            }
             var xp = this.GetRequiredEXP((Species)pokemon.Species, level);
             pokemon.EXP = xp;
             pokemon.CurrentLevel = level;
@@ -111,7 +133,7 @@ namespace Generator.Core
             if (levelStr != null)
             {
                 if (!byte.TryParse(levelStr, out var level))
-                    throw new ArgumentException("--level must be a byte between 1 and 100.");
+                    throw new ArgumentException("Could not parse level to byte");
                 this.SetLevel(level);
             }
             else if (xpStr != null)
@@ -143,9 +165,11 @@ namespace Generator.Core
             if(count > 510)
             {
                 throw new ArgumentException("EVs cannot be over 510!");
+            } else if(count < 0 )
+            {
+                throw new ArgumentException("EVs cannot be under 0!");
             }
-
-
+           // TODO: implement
 
         }
         protected internal virtual void SetForm()
@@ -167,7 +191,6 @@ namespace Generator.Core
             pokemon.Moves = moves;
         }
 
-        protected internal abstract IPersonalTable GetPersonalTable();
         protected internal virtual void SetIVs()
         {
             var stats = ParseStatArray(GetArgOrDefault("ivs", "0,0,0,0,0,0"));
@@ -183,7 +206,7 @@ namespace Generator.Core
 
         protected internal virtual uint GetRequiredEXP(Species species, byte level)
         {
-            var table = GetPersonalTable();
+            var table = this.GetPersonalTable();
             var growth = table[(int)species].EXPGrowth;
             return Experience.GetEXP(growth, level);
         }
