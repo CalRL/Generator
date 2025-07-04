@@ -59,3 +59,13 @@ publish/
 [Pp]ublish/
 [Ee]xported/
 /PKHeX
+/libs
+
+*.runsettings
+
+# Ignore build output for all projects
+**/bin/
+**/obj/
+
+# Ignore test results
+**/TestResult/
