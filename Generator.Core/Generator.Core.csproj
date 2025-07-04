@@ -7,9 +7,9 @@
   </PropertyGroup>
   
   <ItemGroup>
-    <Reference Include="PKHeX.Core">
-      <HintPath>..\PKHeX\PKHeX.Core\bin\Release\net9.0\PKHeX.Core.dll</HintPath>
-    </Reference>
+	  <ItemGroup>
+		  <ProjectReference Include="..\PKHeX\PKHeX.Core\PKHeX.Core.csproj" />
+	  </ItemGroup>
   </ItemGroup>
   
   <ItemGroup>
