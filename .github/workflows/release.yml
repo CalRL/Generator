@@ -59,24 +59,27 @@ jobs:
                   $version = "${{ steps.version.outputs.version }}"
                   $lines = Get-Content CHANGELOG.md
                   $found = $false
-                  $entry = ""
+                  $entryLines = New-Object System.Collections.Generic.List[string]
 
                   foreach ($line in $lines) {
-                      if ($line -match "## \[$version\]") {
-                          $found = $true
-                          continue
-                      }
+                    if ($line -match "## \[$version\]") {
+                      $found = $true
+                      continue
+                    }
 
-                      if ($found -and $line -match "^## \[") {
-                          break
-                      }
+                    if ($found -and $line -match "^## \[") {
+                      break
+                    }
 
-                      if ($found) {
-                          $entry += "$line`n"
-                      }
+                    if ($found) {
+                      $entryLines.Add($line)
+                    }
                   }
 
-                  echo "notes=$entry" >> $env:GITHUB_OUTPUT
+                  $joined = $entryLines -join "`n"
+                  "notes<<EOF" >> $env:GITHUB_OUTPUT
+                  $joined >> $env:GITHUB_OUTPUT
+                  "EOF" >> $env:GITHUB_OUTPUT
 
             - name: Create GitHub release
               uses: softprops/action-gh-release@v1
