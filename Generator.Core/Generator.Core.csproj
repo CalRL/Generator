@@ -5,11 +5,9 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
   </PropertyGroup>
-  
+	
   <ItemGroup>
-	  <ItemGroup>
-		  <ProjectReference Include="..\PKHeX\PKHeX.Core\PKHeX.Core.csproj" />
-	  </ItemGroup>
+    <ProjectReference Include="..\PKHeX\PKHeX.Core\PKHeX.Core.csproj" />
   </ItemGroup>
   
   <ItemGroup>
