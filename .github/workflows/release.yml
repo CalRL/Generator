@@ -86,6 +86,7 @@ jobs:
               with:
                   tag_name: v${{ steps.version.outputs.version }}
                   name: v${{ steps.version.outputs.version }}
+                  draft: true
                   generate_release_notes: true
                   body: ${{ steps.changelog.outputs.notes }}
                   files: Generator.zip
