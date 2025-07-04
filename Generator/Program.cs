@@ -11,6 +11,7 @@ class Program
         IGenerator generator = version switch
         {
             9 => new PK9Generator(args),
+            3 => new PK3Generator(args),
             _ => throw new NotSupportedException($"Unsupported version: {version}")
         };
 

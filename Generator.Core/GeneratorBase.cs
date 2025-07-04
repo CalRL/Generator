@@ -63,10 +63,12 @@ namespace Generator.Core
             string name = GetArgOrDefault("nickname", species.ToString());
             this.SetName(name);
 
-            bool isShiny = bool.Parse(GetArgOrDefault("shiny", "false"));
-            this.SetShiny(isShiny);
+            this.SetShinyFromArgs();
 
+            this.CheckMoveArgConflicts();
+            this.SetMovesFromArgs();
             this.SetMoves();
+
             this.SetIVs();
             this.SetForm();
         }
@@ -94,7 +96,62 @@ namespace Generator.Core
             try { return GetArg(key); }
             catch { return null; }
         }
+        protected bool ArgsContain(string key) => this.args.Any(a => a.Equals($"--{key}", StringComparison.OrdinalIgnoreCase));
+        protected void CheckMoveArgConflicts()
+        {
+            bool hasBulkMoves = ArgsContain("moves");
+            bool hasIndividualMoves = ArgsContain("move1") || ArgsContain("move2") ||
+                                      ArgsContain("move3") || ArgsContain("move4");
 
+            if (hasBulkMoves && hasIndividualMoves)
+                throw new ArgumentException("Cannot use --moves and --move1 to --move4 together. Choose only one method.");
+        }
+
+        protected internal void SetMovesFromArgs()
+        {
+            string? movesArg = GetArgOrNull("moves");
+            if(string.IsNullOrWhiteSpace(movesArg))
+            {
+                return;
+            }
+
+            string[] moveNames = movesArg.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+
+            if(movesArg.Length > 4)
+            {
+                throw new ArgumentException("A maximum of 4 moves can be assigned.");
+            }
+
+            for(int i = 0; i < moveNames.Length; i++)
+            {
+                string moveName = moveNames[i];
+                
+                ushort move = ParseMove(moveName);
+
+                this.pokemon.SetMove(i, move);
+            }
+
+        }
+
+        protected internal void SetShinyFromArgs()
+        {
+            string? shinyArg = GetArgOrNull("shiny");
+
+            if(shinyArg is null)
+            {
+                if (this.ArgsContain("shiny")) {
+                    this.SetShiny(true);
+                }
+            }
+            else
+            {
+                if (bool.TryParse(shinyArg, out bool isShiny))
+                    this.SetShiny(isShiny);
+                else
+                    throw new ArgumentException("--shiny must be true or false");
+            }
+        }
+             
         protected internal Species ParseSpecies(string name) => Enum.Parse<Species>(name, true);
         protected internal Nature ParseNature(string name) => Enum.Parse<Nature>(name, true);
         protected internal ushort ParseMove(string name) => (ushort)Enum.Parse<Move>(name, true);
