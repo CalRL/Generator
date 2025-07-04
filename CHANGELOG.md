@@ -4,7 +4,7 @@
 
 -   Initial release
 
-## [0.1.1] - 04-07-2025
+## [0.2.0] - 04-07-2025
 
 -   Added install docs
 -   Added usage docs
